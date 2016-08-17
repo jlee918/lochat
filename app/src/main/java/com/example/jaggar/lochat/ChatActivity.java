@@ -1,12 +1,12 @@
 package com.example.jaggar.lochat;
 
 import android.os.*;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.parse.LogInCallback;
@@ -16,6 +16,9 @@ import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ChatActivity extends AppCompatActivity {
     static final String TAG = ChatActivity.class.getSimpleName();
 
@@ -24,6 +27,12 @@ public class ChatActivity extends AppCompatActivity {
 
     EditText etMessage;
     Button btSend;
+
+    ListView lvChat;
+    ArrayList<com.example.jaggar.lochat.Message> mMessages;
+    ChatListAdapter mAdapter;
+
+    boolean mFirstLoad;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +66,14 @@ public class ChatActivity extends AppCompatActivity {
     void setupMessagePosting(){
         etMessage = (EditText) findViewById(R.id.etMessage);
         btSend = (Button) findViewById(R.id.btSend);
+        lvChat = (ListView) findViewById(R.id.lvChat);
+        mMessages = new ArrayList<>();
+        lvChat.setTranscriptMode(1);
+        mFirstLoad = true;
+        final String userId = ParseUser.getCurrentUser().getObjectId();
+        mAdapter = new ChatListAdapter(ChatActivity.this, userId, mMessages);
+        lvChat.setAdapter(mAdapter);
+
         btSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -81,5 +98,9 @@ public class ChatActivity extends AppCompatActivity {
                 etMessage.setText(null);
             }
         });
+    }
+
+    void refreshMessages() {
+        
     }
 }

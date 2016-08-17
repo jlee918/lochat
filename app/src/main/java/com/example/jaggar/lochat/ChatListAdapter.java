@@ -18,10 +18,10 @@ import java.util.List;
 /**
  * Created by jaggar on 2016-08-16.
  */
-public class ChatListAdapter extends ArrayAdapter<Message> {
+public class ChatListAdapter extends ArrayAdapter<com.example.jaggar.lochat.Message> {
     private String mUserId;
 
-    public ChatListAdapter(Context context, String userId, List<Message> messages) {
+    public ChatListAdapter(Context context, String userId, List<com.example.jaggar.lochat.Message> messages) {
         super(context, 0, messages);
         this.mUserId = userId;
     }
@@ -37,7 +37,7 @@ public class ChatListAdapter extends ArrayAdapter<Message> {
             holder.body = (TextView)convertView.findViewById(R.id.tvBody);
             convertView.setTag(holder);
         }
-        final Message message = getItem(position);
+        final com.example.jaggar.lochat.Message message = getItem(position);
         final ViewHolder holder = (ViewHolder)convertView.getTag();
         final boolean isMe = message.getUserId() != null && message.getUserId().equals(mUserId);
         // Show-hide image based on the logged-in user.
