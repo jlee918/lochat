@@ -9,14 +9,17 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.parse.FindCallback;
 import com.parse.LogInCallback;
 import com.parse.ParseAnonymousUtils;
 import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
@@ -24,6 +27,7 @@ public class ChatActivity extends AppCompatActivity {
 
     static final String USER_ID_KEY = "userId";
     static final String BODY_KEY = "body";
+    static final int MAX_CHAT_MESSAGES_TO_SHOW = 50;
 
     EditText etMessage;
     Button btSend;
@@ -44,6 +48,8 @@ public class ChatActivity extends AppCompatActivity {
         } else {
             login();
         }
+
+        mHandler.postDelayed(mRefreshMessagesRunnable, POLL_INTERVAL);
     }
 
     void startWithCurrentUser() {
@@ -88,7 +94,7 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void done(ParseException e) {
                         if (e == null ) {
-                            Toast.makeText(ChatActivity.this, "Successfully created message on Parse",
+                            Toast.makeText(ChatActivity.this, "Message Sent",
                                     Toast.LENGTH_SHORT).show();
                         } else {
                             Log.e(TAG, "Failed to save message", e);
@@ -101,6 +107,39 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     void refreshMessages() {
-        
+        ParseQuery<com.example.jaggar.lochat.Message> query = ParseQuery.getQuery(com.example.jaggar.lochat.Message.class);
+
+        query.setLimit(MAX_CHAT_MESSAGES_TO_SHOW);
+        query.orderByDescending("createdAt");
+
+        query.findInBackground(new FindCallback<com.example.jaggar.lochat.Message>() {
+            public void done(List<com.example.jaggar.lochat.Message> messages, ParseException e) {
+                if (e == null) {
+                    mMessages.clear();
+                    Collections.reverse(messages);
+                    mMessages.addAll(messages);
+                    mAdapter.notifyDataSetChanged();
+
+                    if (mFirstLoad) {
+                        lvChat.setSelection(mAdapter.getCount() - 1);
+                        mFirstLoad = false;
+                    }
+                } else {
+                    Log.e("message", "Error Loading Messages" + e);
+                }
+            }
+        });
     }
+
+    static final int POLL_INTERVAL = 1000;
+    Handler mHandler = new Handler();
+    Runnable mRefreshMessagesRunnable = new Runnable() {
+        @Override
+        public void run() {
+            refreshMessages();
+            mHandler.postDelayed(this, POLL_INTERVAL);
+        }
+    };
+
+
 }
